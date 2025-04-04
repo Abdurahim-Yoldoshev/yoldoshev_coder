@@ -13,7 +13,11 @@ const User = new Schema({
         type:Boolean,
         defualt:true
     },
-    creted:Date
-})
+    creted:Date,
+    language: {
+        type:String,
+        default:'uz'
+    }
+});
 
 module.exports = model('User', User);

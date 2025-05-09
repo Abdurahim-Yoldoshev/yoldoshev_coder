@@ -1,9 +1,13 @@
 const {Schema, model} = require('mongoose');
 
 const User = new Schema({
-    name:String,
+    fullName:String,
     chatId:Number,
     phone:String,
+    owner: {
+        type:Boolean,
+        default:false
+    },
     admin: {
         type:Boolean,
         defualt:false
@@ -13,11 +17,7 @@ const User = new Schema({
         type:Boolean,
         defualt:true
     },
-    creted:Date,
-    language: {
-        type:String,
-        default:'uz'
-    }
+    createdAt:Date,
 });
 
 module.exports = model('User', User);

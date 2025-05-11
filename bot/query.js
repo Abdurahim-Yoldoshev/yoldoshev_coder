@@ -10,6 +10,9 @@ const {
     editProduct,
     deleteProduct
 } = require('./helper/service');
+const {newApp, openApp, AppsController} = require('./helper/apps');
+const {ChannelAdd, ChannelRemove} = require('./helper/settings');
+const { start } = require('./helper/start');
 
 bot.on('callback_query', async query => {
     const {data} = query
@@ -48,4 +51,21 @@ bot.on('callback_query', async query => {
         const id = data.split('-')[1];
         editService(chatId, id);
     }
+    if(data === 'new_app'){
+        newApp(chatId);
+    }
+    if(data.startsWith('app_')){
+        const appId = data.split('_')[1];
+        openApp(chatId, appId);
+    }
+    if(data === 'apps'){
+        AppsController(chatId);
+    }
+    if(data === 'add_channel'){
+        ChannelAdd(chatId);
+    }
+    if(data === 'remove_channel'){
+        ChannelRemove(chatId);
+    }
+        
 })

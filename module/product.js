@@ -6,7 +6,11 @@ const Product = new Schema({
         ref: 'Services'
     },
     title: String,
-    price:String
+    price:String,
+    description: {
+        type: String,
+        defult: 'Xizmat haqida ma\'lumotlar yo\'q'
+    }
 });
 
 module.exports = model('Products', Product);

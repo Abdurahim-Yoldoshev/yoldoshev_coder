@@ -7,7 +7,9 @@ const {
 const {
     users
 } = require('./helper/users');
+const {Settings, ChannelController} = require('./helper/settings');
 const {servics} = require('./helper/service');
+const {AppsController} = require('./helper/apps');
 
 bot.setMyCommands([
     {command: '/start', description: 'Botni qayta ishga tushirish'},
@@ -33,6 +35,18 @@ bot.on('message', async msg => {
         }
         if(text == '💎 Xizmatlarni boshqarish' || text == '💎 Xizmatlar'){
             servics(chatId);
+        }
+        if(text === '💠 Ilovlar'){
+            AppsController(chatId);
+        }
+        if(text === '⚙️ Sozlamalar'){
+            Settings(msg);
+        }
+        if(text === '🔔 Kanallarni boshqarish'){
+            ChannelController(chatId);
+        }
+        if(text === '🔙 Bosh sahifaga qaytish'){
+            start(msg);
         }
     }
 });

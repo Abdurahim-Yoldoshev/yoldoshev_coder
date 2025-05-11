@@ -4,12 +4,8 @@ const userKeyboard = [
         {text: "💎 Xizmatlar"}
     ],
     [
-        {text: "💿 Ma'lumotlar"},
-        {text: "💼 Portfolio"}
-    ],
-    [
         {text: "💠 Ilovlar"},
-        {text: "📞 Aloqa"}
+        {text: "💼 Portfolio"}
     ],
     [
         {text: "ℹ Biz haqimizda"}
@@ -22,12 +18,8 @@ const adminKeyboard = [
         {text: "💎 Xizmatlarni boshqarish"}
     ],
     [
-        {text: "💿 Ma'lumotlarni tahrirlash"},
-        {text: "💼 Portfolio"}
-    ],
-    [
         {text: "💠 Ilovlar"},
-        {text: "📞 Aloqa"}
+        {text: "💼 Portfolio"}
     ],
     [
         {text: "⚙️ Sozlamalar"}
@@ -41,5 +33,6 @@ const back = [
 
 module.exports = {
     userKeyboard,
-    adminKeyboard
+    adminKeyboard,
+    back
 };

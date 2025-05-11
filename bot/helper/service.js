@@ -146,10 +146,10 @@ const editService = async (chatId) => {
 
 const deleteService = async (chatId) => {
     const user = await User.findOne({chatId}).lean();
-    bot.sendMessage(chatId, `Xizmatni o'chirish uchun xizmat nomini kiriting:`,{
+    bot.sendMessage(chatId, `Xizmatni o'chirish uchun xizmat nomini kiriting:`, {
         reply_markup: {
             remove_keyboard: true,
-            inline_keyboard:[
+            inline_keyboard: [
                 [
                     {
                         text: '❌ Bekor qilish',
@@ -170,6 +170,11 @@ const deleteService = async (chatId) => {
         const service = await Service.findOne({ title: serviceName });
         if (!service) {
             bot.sendMessage(chatId, `❌ Bunday xizmat topilmadi.`);
+            return;
+        }
+        const productsCount = await Product.countDocuments({ services: service._id });
+        if (productsCount > 0) {
+            bot.sendMessage(chatId, `❌ Ushbu xizmatni o'chirib bo'lmaydi, avval unga bog'liq mahsulotlarni o'chiring.`);
             return;
         }
         await Service.deleteOne({ _id: service._id });

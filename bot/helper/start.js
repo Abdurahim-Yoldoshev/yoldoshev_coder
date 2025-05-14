@@ -121,6 +121,8 @@ bot.on('callback_query', async (query) => {
             );
 
             if (isSubscribed) {
+                bot.deleteMessage(chatId, query.message.message_id);
+                bot.deleteMessage(chatId, query.message.message_id - 1);
                 bot.sendMessage(chatId,`<b>📱 Telefon raqamingiz qabul qilindi.\n\n✅ Botdan foydanishingiz mumkin❗️</b>\n\n<i>📁 Kerakli bo'limni tanlang:</i>`,{
                 parse_mode: 'HTML',
                 reply_markup: {
@@ -129,6 +131,7 @@ bot.on('callback_query', async (query) => {
                 }
             });
             } else {
+                bot.deleteMessage(chatId, query.message.message_id);
                 bot.sendMessage(chatId, `<b>❌ Obuna tasdiqlanmadi. Iltimos, barcha kanallarga obuna bo'ling va qayta tekshiring.</b>`, {
                     parse_mode: 'HTML'
                 });

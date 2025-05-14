@@ -1,5 +1,4 @@
 const {Schema, model} = require('mongoose');
-
 const Channel = new Schema({
     channelName: String,
     channelId: Number,

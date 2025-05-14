@@ -10,7 +10,8 @@ const Product = new Schema({
     description: {
         type: String,
         defult: 'Xizmat haqida ma\'lumotlar yo\'q'
-    }
+    },
+    url:String
 });
 
 module.exports = model('Products', Product);

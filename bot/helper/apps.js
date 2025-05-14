@@ -8,11 +8,8 @@ const AppsController =  async (chatId) => {
     await User.findByIdAndUpdate(user._id, user, {new: true});
     const apps = await Apps.find().lean();
     if(apps.length > 0){
-        let text = `📱 Botda mavjud bo'lgan ilovalar:\n\n`;
-        apps.forEach((app, index) => {
-            text += `${index + 1}. ${app.name}\n`;
-        });
-        text += `\n📲 Ilovalarni tanlang:`;
+        let text = `<i>📲 Ilovalarga ma'sul bot:</i> @AppsStoreUzBot\n\n`;
+        text += `<b>📱 Botda mavjud bo'lgan ilovalar:</b>`;
         let list = apps.map(app => 
                [
                 {
@@ -34,6 +31,7 @@ const AppsController =  async (chatId) => {
                 ] : []
                );
         bot.sendMessage(chatId, text, {
+            parse_mode: 'HTML',
             reply_markup: {
             inline_keyboard: list
             }
@@ -117,6 +115,7 @@ const openApp = async (chatId, appId) => {
         bot.sendMessage(chatId, `❌ Ilova topilmadi!`);
     }
 }
+
 module.exports = {
     AppsController,
     newApp,

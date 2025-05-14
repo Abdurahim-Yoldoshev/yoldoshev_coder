@@ -7,15 +7,17 @@ const {
 const {
     users
 } = require('./helper/users');
-const {Settings, ChannelController} = require('./helper/settings');
+const {Settings, ChannelController, UserController} = require('./helper/settings');
 const {servics} = require('./helper/service');
 const {AppsController} = require('./helper/apps');
+const {portfolio} = require('./helper/portfoli');
+const {weDate} = require("./helper/weDate");
 
 bot.setMyCommands([
-    {command: '/start', description: 'Botni qayta ishga tushirish'},
-    {command: '/help', description: 'Yordam markazi'},
-    {command: '/info', description: 'Foydalanuvchi haqida ma\'lumot'},
-    {command: '/apps', description: 'Ilovalar ro\'yxati'}
+    {command: '/start', description: '🚀 Botni qayta ishga tushirish'},
+    {command: '/help', description: '❓ Yordam markazi'},
+    {command: '/info', description: 'ℹ️ Foydalanuvchi haqida ma\'lumot'},
+    {command: '/apps', description: '📱 Ilovalar ro\'yxati'}
 ]);
 
 bot.on('message', async msg => {
@@ -30,13 +32,13 @@ bot.on('message', async msg => {
         if(user.action === 'requestContact' && msg.contact){
             request_contact(msg);
         }
-        if(text === '👤 Profil' || text === '👤 Foydalanuvchilar'){
+        if(text === '👤 Profil' || text === '👤 Foydalanuvchilar' || text === '/info'){
             users(msg);
         }
         if(text == '💎 Xizmatlarni boshqarish' || text == '💎 Xizmatlar'){
             servics(chatId);
         }
-        if(text === '💠 Ilovlar'){
+        if(text === '💠 Ilovlar' || text ==='/apps'){
             AppsController(chatId);
         }
         if(text === '⚙️ Sozlamalar'){
@@ -47,6 +49,15 @@ bot.on('message', async msg => {
         }
         if(text === '🔙 Bosh sahifaga qaytish'){
             start(msg);
+        }
+        if(text === '👤 Foydalanuvchiarni boshqarish'){
+            UserController(chatId);
+        }
+        if(text === '💼 Portfolio'){
+            portfolio(chatId,msg);
+        }
+        if(text === 'ℹ Biz haqimizda' || text === '/help'){
+            weDate(msg);
         }
     }
 });

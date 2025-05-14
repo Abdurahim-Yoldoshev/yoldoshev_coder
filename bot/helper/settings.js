@@ -10,7 +10,7 @@ const Settings = async (msg) => {
             parse_mode: 'HTML',
             reply_markup: {
                 keyboard: [
-                    [{text: '🔔 Kanallarni boshqarish'}],
+                    [{text: '🔔 Kanallarni boshqarish'},{text:'👤 Foydalanuvchiarni boshqarish'}],
                     [{text: "🔙 Bosh sahifaga qaytish"}]
                 ],
                 resize_keyboard: true,
@@ -22,7 +22,7 @@ const Settings = async (msg) => {
             parse_mode: 'HTML'
         })
     }
-} 
+};
 
 const ChannelController = async (chatId) => {
     const user = await User.findOne({chatId});
@@ -67,7 +67,7 @@ const ChannelController = async (chatId) => {
             })
         }
     }
-}
+};
 
 const ChannelAdd = async (chatId) => {
     const user = await User.findOne({chatId}).lean();
@@ -189,10 +189,227 @@ const ChannelRemove = async (chatId) => {
             ChannelController(chatId);
         }
     });
-}    
+};
+
+const UserController = async (chatId) => {
+    const user = await User.findOne({ chatId }).lean();
+    const users = await User.find().lean();
+    if (user.admin) {
+        let list = users.map((user, index) => 
+            `${index + 1}. ${user.firstName || `${user.owner ? 'BOSS' : `${user.admin ? 'Admin' : `${user.fullName}`}`}`} - <code>${user.chatId}</code>`
+        ).join('\n');
+        bot.sendMessage(chatId, `<b>👥 Foydalanuvchilar ro'yxati:\n\n${list}</b>\n\n<i>Jami foydalanuvchilar: ${users.length}</i>`, {
+            parse_mode: 'HTML',
+            reply_markup: {
+                inline_keyboard: user.owner ?[
+                    [
+                        {
+                            text: '🛡️ Admin qilish',
+                            callback_data: 'make_admin'
+                        },
+                        {
+                            text: '❌ Adminlikni olib tashlash',
+                            callback_data: 'remove_admin'
+                        }
+                    ],
+                    [
+                        {
+                            text: '👑 Egalikni o\'zgartirish',
+                            callback_data: 'change_owner'
+                        }
+                    ] 
+                ]: [],
+                resize_keyboard: true,
+                one_time_keyboard: true
+            }
+        });
+    } else {
+        bot.sendMessage(chatId, `<b>❌ Bu bo'lim faqat adminlar uchun!</b>`, {
+            parse_mode: 'HTML'
+        });
+    }
+};
+
+const makeAdmin = async (chatId) => {
+    const user = await User.findOne({ chatId }).lean();
+    if (!user.admin) {
+        bot.sendMessage(chatId, `<b>❌ Bu bo'lim faqat adminlar uchun!</b>`, {
+            parse_mode: 'HTML'
+        });
+        return;
+    }
+
+    user.action = 'make_admin';
+    await User.findByIdAndUpdate(user._id, user, { new: true });
+
+    bot.sendMessage(chatId, `<b>🛡️ Admin qilish uchun foydalanuvchi chat ID sini kiriting:</b>`, {
+        parse_mode: 'HTML',
+        reply_markup: {
+            remove_keyboard: true
+        }
+    });
+
+    bot.once('message', async (msg) => {
+        if (msg.from.id !== chatId) return;
+
+        const targetChatId = msg.text;
+        const targetUser = await User.findOne({ chatId: targetChatId }).lean();
+
+        if (!targetUser) {
+            bot.sendMessage(chatId, `<b>❌ Foydalanuvchi topilmadi!</b>`, {
+                parse_mode: 'HTML'
+            });
+            return;
+        }
+
+        if (targetUser.admin) {
+            bot.sendMessage(chatId, `<b>❌ Ushbu foydalanuvchi allaqachon admin!</b>`, {
+                parse_mode: 'HTML'
+            });
+            return;
+        }
+
+        await User.findByIdAndUpdate(targetUser._id, { admin: true }, { new: true });
+
+        bot.sendMessage(chatId, `<b>✅ ${targetUser.firstName || targetUser.fullName} admin qilindi!</b>`, {
+            parse_mode: 'HTML',
+            reply_markup: {
+                keyboard: [
+                    [{ text: "🔙 Bosh sahifaga qaytish" }]
+                ],
+                resize_keyboard: true,
+                one_time_keyboard: true
+            }
+        });
+        bot.sendMessage(targetChatId, '🛡️ <b><i>Tabriklaymiz siz admin bo`ldingiz</i>\n\nSidqi dildan ishlaysiz degan umiddamiz.\n\n                                       <i>Hurmat bilan: Bot Egasi</i></b>',{
+            parse_mode:"HTML"
+        })
+    });
+    UserController(chatId);
+};
+
+const removiAdmin = async (chatId) => {
+    const user = await User.findOne({ chatId }).lean();
+    if (!user.admin) {
+        bot.sendMessage(chatId, `<b>❌ Bu bo'lim faqat adminlar uchun!</b>`, {
+            parse_mode: 'HTML'
+        });
+        return;
+    }
+
+    user.action = 'remove_admin';
+    await User.findByIdAndUpdate(user._id, user, { new: true });
+
+    bot.sendMessage(chatId, `<b>❌ Adminlikni olib tashlash uchun foydalanuvchi chat ID sini kiriting:</b>`, {
+        parse_mode: 'HTML',
+        reply_markup: {
+            remove_keyboard: true
+        }
+    });
+
+    bot.once('message', async (msg) => {
+        if (msg.from.id !== chatId) return;
+
+        const targetChatId = msg.text;
+        const targetUser = await User.findOne({ chatId: targetChatId }).lean();
+
+        if (!targetUser) {
+            bot.sendMessage(chatId, `<b>❌ Foydalanuvchi topilmadi!</b>`, {
+                parse_mode: 'HTML'
+            });
+            return;
+        }
+
+        if (!targetUser.admin) {
+            bot.sendMessage(chatId, `<b>❌ Ushbu foydalanuvchi admin emas!</b>`, {
+                parse_mode: 'HTML'
+            });
+            return;
+        }
+
+        await User.findByIdAndUpdate(targetUser._id, { admin: false }, { new: true });
+
+        bot.sendMessage(chatId, `<b>✅ ${targetUser.firstName || targetUser.fullName} adminlikdan olib tashlandi!</b>`, {
+            parse_mode: 'HTML',
+            reply_markup: {
+                keyboard: [
+                    [{ text: "🔙 Bosh sahifaga qaytish" }]
+                ],
+                resize_keyboard: true,
+                one_time_keyboard: true
+            }
+        });
+        bot.sendMessage(targetChatId, `❌ Afsus bilan ma'lum qilamizki, siz endi "Admin" emassiz!\n\n⚠️ Agarda xatolik bilan bo'lgan bo'lsa, Bot egasiga murojat qiling!`);
+        UserController(chatId);
+    });
+};
+
+const changeOwner = async (chatId) => {
+    const user = await User.findOne({ chatId }).lean();
+    if (!user.owner) {
+        bot.sendMessage(chatId, `<b>❌ Bu bo'lim faqat bot egasi uchun!</b>`, {
+            parse_mode: 'HTML'
+        });
+        return;
+    }
+
+    user.action = 'change_owner';
+    await User.findByIdAndUpdate(user._id, user, { new: true });
+
+    bot.sendMessage(chatId, `<b>👑 Egalikni o'zgartirish uchun foydalanuvchi chat ID sini kiriting:</b>`, {
+        parse_mode: 'HTML',
+        reply_markup: {
+            remove_keyboard: true
+        }
+    });
+
+    bot.once('message', async (msg) => {
+        if (msg.from.id !== chatId) return;
+
+        const targetChatId = msg.text;
+        const targetUser = await User.findOne({ chatId: targetChatId }).lean();
+
+        if (!targetUser) {
+            bot.sendMessage(chatId, `<b>❌ Foydalanuvchi topilmadi!</b>`, {
+                parse_mode: 'HTML'
+            });
+            return;
+        }
+
+        if (targetUser.owner) {
+            bot.sendMessage(chatId, `<b>❌ Ushbu foydalanuvchi allaqachon bot egasi!</b>`, {
+                parse_mode: 'HTML'
+            });
+            return;
+        }
+
+        await User.updateMany({}, { owner: false }); // Remove owner status from all users
+        await User.findByIdAndUpdate(targetUser._id, { owner: true, admin: true }, { new: true });
+
+        bot.sendMessage(chatId, `<b>✅ ${targetUser.firstName || targetUser.fullName} endi bot egasi bo'ldi!</b>`, {
+            parse_mode: 'HTML',
+            reply_markup: {
+                keyboard: [
+                    [{ text: "🔙 Bosh sahifaga qaytish" }]
+                ],
+                resize_keyboard: true,
+                one_time_keyboard: true
+            }
+        });
+
+        bot.sendMessage(targetChatId, `👑 <b>Tabriklaymiz! Siz endi bot egasi bo'ldingiz!</b>\n\n<i>Hurmat bilan: Bot</i>`, {
+            parse_mode: 'HTML'
+        });
+        UserController(chatId);
+    });
+};
 module.exports = {
     Settings,
     ChannelController,
     ChannelAdd,
-    ChannelRemove
+    ChannelRemove,
+    UserController,
+    makeAdmin,
+    removiAdmin,
+    changeOwner
 };
